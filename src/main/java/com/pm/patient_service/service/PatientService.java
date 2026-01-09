@@ -1,5 +1,6 @@
 package com.pm.patient_service.service;
 
+import com.pm.patient_service.dto.PatientRequestDTO;
 import com.pm.patient_service.dto.PatientResponseDTO;
 import com.pm.patient_service.mapper.PatientMapper;
 import com.pm.patient_service.model.Patient;
@@ -12,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,5 +34,19 @@ public class PatientService {
 
         log.info("Fetched {} patients from the database.", patientResponseDTOS.size());
         return patientResponseDTOS;
+    }
+
+    public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
+        //1. Convert PatientRequestDTO to Patient entity
+       Patient patient = patientMapper.toPatient(patientRequestDTO);
+
+       //2. Save Patient entity to database
+       patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
+       patient.setRegisteredDate(LocalDate.parse(patientRequestDTO.getRegisteredDate()));
+
+       //3 save to db
+        Patient savedPatient = patientRepository.save(patient);
+
+       return patientMapper.toPatientResponseDTO(savedPatient);
     }
 }
